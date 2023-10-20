@@ -5,17 +5,18 @@ using Fusion;
 
 public class Player : NetworkBehaviour
 {
+  private NetworkCharacterControllerPrototype _cc;
+  private Character _character;
+  private Vector3 _forward;
   [SerializeField] private Ball _prefabBall;
   [SerializeField] private PhysxBall _prefabPhysxBall;
 
   [Networked] private TickTimer delay { get; set; }
 
-  private NetworkCharacterControllerPrototype _cc;
-  private Vector3 _forward;
-
   private void Awake()
   {
     _cc = GetComponent<NetworkCharacterControllerPrototype>();
+    _character = GetComponent<Character>();
     _forward = transform.forward;
   }
 
@@ -29,9 +30,15 @@ public class Player : NetworkBehaviour
     if (data.direction.sqrMagnitude > 0)
       _forward = data.direction;
 
+    if (data.jump && _cc.IsGrounded)
+    {
+      _cc.Jump();
+      data.jump = false;
+    }
+
     if (delay.ExpiredOrNotRunning(Runner))
     {
-      if ((data.buttons & NetworkInputData.MOUSEBUTTON1) != 0)
+      if ((data.attack & NetworkInputData.MOUSEBUTTON1) != 0)
       {
         delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
         Runner.Spawn(_prefabBall,
@@ -43,8 +50,9 @@ public class Player : NetworkBehaviour
             // Initialize the Ball before synchronizing it
             o.GetComponent<Ball>().Init();
           });
+        _character.BaseAttack();
       }
-      else if ((data.buttons & NetworkInputData.MOUSEBUTTON2) != 0)
+      else if ((data.throwSlime & NetworkInputData.MOUSEBUTTON2) != 0)
       {
         delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
         Runner.Spawn(_prefabPhysxBall,
@@ -55,9 +63,9 @@ public class Player : NetworkBehaviour
           {
             o.GetComponent<PhysxBall>().Init( 10*_forward );
           });
+        _character.ThrowSlime();
       }
     }
   }
 }
-
 }
