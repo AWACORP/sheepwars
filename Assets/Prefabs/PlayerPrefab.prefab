@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 5999044923610560960}
   - component: {fileID: 5999044923610560961}
   - component: {fileID: 5999044923610560965}
+  - component: {fileID: 6428709712086459356}
   m_Layer: 0
   m_Name: PlayerPrefab
   m_TagString: Player
@@ -143,6 +144,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 5999044923610560961}
   - {fileID: 5999044923610560965}
+  - {fileID: 6428709712086459356}
   SimulationBehaviours: []
 --- !u!143 &5999044923610560960
 CharacterController:
@@ -213,3 +215,18 @@ MonoBehaviour:
   _interpolationDataSource: 0
   _prefabBall: {fileID: 2504583302944143902, guid: 548762648d4ad8f41abf866386b90632, type: 3}
   _prefabPhysxBall: {fileID: 2408418962740373711, guid: ac277a9fd7db91044a421e899da91dd4, type: 3}
+--- !u!114 &6428709712086459356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5999044923610560962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cfcb30e3a5f708408740025a7937f66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _interpolationDataSource: 0
+  MAX_NB_SLIMES: 3
+  MAX_NB_TALISMAN: 2

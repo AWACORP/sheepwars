@@ -63,12 +63,17 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     if (Input.GetKey(KeyCode.D))
       data.direction += Vector3.right;
 
+    if (Input.GetKey(KeyCode.Space))
+    {
+      data.jump = true;
+    }
+
     if (_mouseButton0)
-      data.buttons |= NetworkInputData.MOUSEBUTTON1;
+      data.attack |= NetworkInputData.MOUSEBUTTON1;
     _mouseButton0 = false;
 
     if (_mouseButton1)
-      data.buttons |= NetworkInputData.MOUSEBUTTON2;
+      data.throwSlime |= NetworkInputData.MOUSEBUTTON2;
     _mouseButton1 = false;
 
     input.Set(data);
