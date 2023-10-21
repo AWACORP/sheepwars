@@ -7,69 +7,72 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
-[SerializeField] private NetworkPrefabRef _playerPrefab;
-private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
+  [SerializeField] private NetworkPrefabRef _playerPrefab;
+  private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
 
-public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
-{
-  if (runner.IsServer)
+
+  public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
   {
-    // Create a unique position for the player
-    Vector3 spawnPosition = new Vector3((player.RawEncoded%runner.Config.Simulation.DefaultPlayers)*3,1,0);
-    NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
-    // Keep track of the player avatars so we can remove it when they disconnect
-    _spawnedCharacters.Add(player, networkPlayerObject);
+    if (runner.IsServer)
+    {
+      // Create a unique position for the player
+      Vector3 spawnPosition = new Vector3((player.RawEncoded % runner.Config.Simulation.DefaultPlayers) * 3, 1, 0);
+      NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
+      // Keep track of the player avatars so we can remove it when they disconnect
+      _spawnedCharacters.Add(player, networkPlayerObject);
+    }
   }
-}
 
-private bool _mouseButton0;
-private bool _mouseButton1;
+  private bool _mouseButton0;
+  private bool _mouseButton1;
 
-private void Update()
-{
-  _mouseButton0 = _mouseButton0 | Input.GetMouseButton(0);
+  private void Update()
+  {
+    _mouseButton0 = _mouseButton0 | Input.GetMouseButton(0);
     _mouseButton1 = _mouseButton1 | Input.GetMouseButton(1);
-
-}
-
-
-public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
-{
- var data = new NetworkInputData();
-
-  // Find and remove the players avatar
-  if (_spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
-  {
-    runner.Despawn(networkObject);
-    _spawnedCharacters.Remove(player);
   }
-}
+
+
+  public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+  {
+    var data = new NetworkInputData();
+
+    // Find and remove the players avatar 
+    if (_spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
+    {
+      runner.Despawn(networkObject);
+      _spawnedCharacters.Remove(player);
+    }
+
+
+  }
+
   public void OnInput(NetworkRunner runner, NetworkInput input)
-{
-  var data = new NetworkInputData();
+  {
+    var data = new NetworkInputData();
 
-  if (Input.GetKey(KeyCode.Z))
-    data.direction += Vector3.forward;
+    if (Input.GetKey(KeyCode.Z))
+      data.direction += Vector3.forward;
 
-  if (Input.GetKey(KeyCode.S))
-    data.direction += Vector3.back;
+    if (Input.GetKey(KeyCode.S))
+      data.direction += Vector3.back;
 
-  if (Input.GetKey(KeyCode.Q))
-    data.direction += Vector3.left;
+    if (Input.GetKey(KeyCode.Q))
+      data.direction += Vector3.left;
 
-  if (Input.GetKey(KeyCode.D))
-    data.direction += Vector3.right;
+    if (Input.GetKey(KeyCode.D))
+      data.direction += Vector3.right;
 
-  if (_mouseButton0)
-    data.buttons |= NetworkInputData.MOUSEBUTTON1;
-  _mouseButton0 = false;
+    if (_mouseButton0)
+      data.buttons |= NetworkInputData.MOUSEBUTTON1;
+    _mouseButton0 = false;
 
-  if(_mouseButton1)
-    data.buttons |= NetworkInputData.MOUSEBUTTON2;
-  _mouseButton1 = false;
+    if (_mouseButton1)
+      data.buttons |= NetworkInputData.MOUSEBUTTON2;
+    _mouseButton1 = false;
 
-  input.Set(data);
-}
+    input.Set(data);
+  }
   public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
   public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
   public void OnConnectedToServer(NetworkRunner runner) { }
@@ -86,36 +89,36 @@ public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
   public void OnSceneLoadStart(NetworkRunner runner) { }
 
   async void StartGame(GameMode mode)
-{
-  // Create the Fusion runner and let it know that we will be providing user input
-  _runner = gameObject.AddComponent<NetworkRunner>();
-  _runner.ProvideInput = true;
-
-  // Start or join (depends on gamemode) a session with a specific name
-  await _runner.StartGame(new StartGameArgs()
   {
-    GameMode = mode,
-    SessionName = "TestRoom",
-    Scene = SceneManager.GetActiveScene().buildIndex,
-    SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
-  });}
+    // Create the Fusion runner and let it know that we will be providing user input
+    _runner = gameObject.AddComponent<NetworkRunner>();
+    _runner.ProvideInput = true;
 
-private NetworkRunner _runner;
+    // Start or join (depends on gamemode) a session with a specific name
+    await _runner.StartGame(new StartGameArgs()
+    {
+      GameMode = mode,
+      SessionName = "TestChamber",
+      Scene = SceneManager.GetActiveScene().buildIndex,
+      SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+    });
+  }
+
+  private NetworkRunner _runner;
 
   private void OnGUI()
-{
-  if (_runner == null)
   {
-    if (GUI.Button(new Rect(0,0,200,40), "Host"))
+    if (_runner == null)
     {
+      if (GUI.Button(new Rect(0, 0, 200, 40), "Host"))
+      {
         StartGame(GameMode.Host);
-    }
-    if (GUI.Button(new Rect(0,40,200,40), "Join"))
-    {
+      }
+      if (GUI.Button(new Rect(0, 40, 200, 40), "Join"))
+      {
         StartGame(GameMode.Client);
+      }
     }
   }
-}
 
 }
- 

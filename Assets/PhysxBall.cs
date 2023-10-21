@@ -13,7 +13,7 @@ public class PhysxBall : NetworkBehaviour
 
   public override void FixedUpdateNetwork()
   {
-    if(life.Expired(Runner))
+    if (life.Expired(Runner))
       Runner.Despawn(Object);
   }
 }
