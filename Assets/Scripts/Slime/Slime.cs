@@ -3,18 +3,44 @@ using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
 
-public enum SlimeType
+[System.Serializable]
+public class SlimeTypeSprite
 {
-    Flaming,
-    Flying,
-    Exploding,
-    Reviving
+    public Slime.SlimeType slimeType;
+    public Sprite sprite;
+    public GameObject modelPrefab;
+
 }
 
-public abstract class Slime : NetworkBehaviour
+public class Slime : NetworkBehaviour
 {
-    public SlimeType slimeType { get; set; }
-    public float lifeSpan { get; set; }
-}
+    public enum SlimeType
+    {
+        Exploding,
+        Healing,
+        Nearing
+    }
 
+    public SlimeType slimeType;
+    public int amount;
+    public float lifeSpan;
+
+    void OnTriggerEnter(Collider other)
+    {
+
+        Character character = other.GetComponent<Character>();
+        if (character != null)
+        {
+            if (character.inventory.CanAddSlime(this))
+            {
+                character.AddSlimeToInventory(this);
+                Destroy(gameObject); // Détruit le Slime de la scène
+            }
+            else
+            {
+                Debug.Log("Inventaire plein. Ne peut pas ramasser le slime " + this.slimeType);
+            }
+        }
+    }
+}
 

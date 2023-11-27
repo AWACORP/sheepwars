@@ -4,7 +4,7 @@ using UnityEngine;
 using Fusion;
 using UnityEngine.UI;
 
-public class FlamingSlime : NetworkBehaviour
+public class FlamingSlime : Slime
 {
     [Networked] private TickTimer life { get; set; }
     public float explosionRadius = 5.0f;
@@ -13,18 +13,13 @@ public class FlamingSlime : NetworkBehaviour
     public float characterControllerMinMultiplier = 10.0f; // Minimum force multiplier
     public float characterControllerMaxMultiplier = 100.0f; // Maximum force multiplier
 
-
     public void Init(Vector3 forward)
     {
         life = TickTimer.CreateFromSeconds(Runner, 5.0f);
         GetComponent<Rigidbody>().velocity = forward;
+        this.slimeType = SlimeType.Exploding;
+        this.amount = 1;
     }
-
-    public FlamingSlime()
-    {
-
-    }
-
     /* private void OnTriggerEnter(Collider other)
      {
          Debug.Log(other.name);
@@ -34,7 +29,7 @@ public class FlamingSlime : NetworkBehaviour
     {
         if (life.Expired(Runner))
         {
-            Explode();
+            //Explode();
             Runner.Despawn(Object);
         }
     }

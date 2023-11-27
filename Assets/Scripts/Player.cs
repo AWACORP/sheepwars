@@ -22,48 +22,50 @@ public class Player : NetworkBehaviour
 
   public override void FixedUpdateNetwork()
   {
-    data.direction.Normalize();
-    _cc.Move(5 * data.direction * Runner.DeltaTime);
-
-    if (data.direction.sqrMagnitude > 0)
-      _forward = data.direction;
-
-    if (data.jump && _cc.IsGrounded)
+    if (GetInput(out NetworkInputData data))
     {
-      _cc.Jump();
-      data.jump = false;
-    }
+      data.direction.Normalize();
+      _cc.Move(5 * data.direction * Runner.DeltaTime);
 
-    if (delay.ExpiredOrNotRunning(Runner))
-    {
-      if ((data.attack & NetworkInputData.MOUSEBUTTON1) != 0)
+      if (data.direction.sqrMagnitude > 0)
+        _forward = data.direction;
+
+      if (data.jump && _cc.IsGrounded)
       {
-        delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
-        Runner.Spawn(_prefabBall,
-          transform.position + _forward,
-          Quaternion.LookRotation(_forward),
-          Object.InputAuthority,
-          (runner, o) =>
-          {
-            // Initialize the Ball before synchronizing it
-            o.GetComponent<Ball>().Init();
-          });
-        _character.BaseAttack();
+        _cc.Jump();
+        data.jump = false;
       }
-      else if ((data.throwSlime & NetworkInputData.MOUSEBUTTON2) != 0)
+
+      if (delay.ExpiredOrNotRunning(Runner))
       {
-        delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
-        Runner.Spawn(_prefabPhysxBall,
-          transform.position + _forward,
-          Quaternion.LookRotation(_forward),
-          Object.InputAuthority,
-          (runner, o) =>
-          {
-            o.GetComponent<PhysxBall>().Init(10 * _forward);
-          });
-        _character.ThrowSlime();
+        if ((data.attack & NetworkInputData.MOUSEBUTTON1) != 0)
+        {
+          delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
+          Runner.Spawn(_prefabBall,
+            transform.position + _forward,
+            Quaternion.LookRotation(_forward),
+            Object.InputAuthority,
+            (runner, o) =>
+            {
+              // Initialize the Ball before synchronizing it
+              o.GetComponent<Ball>().Init();
+            });
+          _character.BaseAttack();
+        }
+        else if ((data.throwSlime & NetworkInputData.MOUSEBUTTON2) != 0)
+        {
+          delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
+          Runner.Spawn(_prefabPhysxBall,
+            transform.position + _forward,
+            Quaternion.LookRotation(_forward),
+            Object.InputAuthority,
+            (runner, o) =>
+            {
+              o.GetComponent<PhysxBall>().Init(10 * _forward);
+            });
+          _character.ThrowSlime();
+        }
       }
     }
   }
-}
 }

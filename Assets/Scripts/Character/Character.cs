@@ -37,16 +37,19 @@ public class Character : NetworkBehaviour
 
     [SerializeField] private Talisman[] talisman;
 
+    public Inventory inventory;
+    private UI_Inventory uiInventory;
+    private GameObject currentSlimeInHand;
 
-    //[SerializeField] private Slime[] slimes;
-    
-    
     // Start is called before the first frame update
     void Start()
     {
         //slimes = new Slime[MAX_NB_SLIMES];
         talisman = new Talisman[MAX_NB_TALISMAN];
         talisman[0] = new VampirismeTalisman(this);
+
+        inventory = new Inventory();
+        uiInventory.SetInventory(inventory);
     }
 
     // Update is called once per frame
@@ -56,16 +59,29 @@ public class Character : NetworkBehaviour
         {
             talisman[0].Effect();
         }
+
+        if (Input.GetAxis("Mouse ScrollWheel") > 0f)
+        {
+            inventory.SelectNextSlime();
+            uiInventory.UpdateSlimeSelectionUI();
+            UpdateSlimeInHand();
+        }
+        else if (Input.GetAxis("Mouse ScrollWheel") < 0f)
+        {
+            inventory.SelectPreviousSlime();
+            uiInventory.UpdateSlimeSelectionUI();
+            UpdateSlimeInHand();
+        }
     }
 
     public void BaseAttack()
     {
-        Debug.Log("Attack mon gars");
+        //Debug.Log("Attack mon gars");
     }
 
     public void ThrowSlime()
     {
-        Debug.Log("Lance mon gars");
+        //Debug.Log("Lance mon gars");
     }
 
     public void HealCharacter(float amountOfHeal)
@@ -82,8 +98,51 @@ public class Character : NetworkBehaviour
     {
         return attack;
     }
-    
-    
-    
-    
+
+    public void SetUIInventory(UI_Inventory inventory)
+    {
+        this.uiInventory = inventory;
+    }
+
+    public void AddSlimeToInventory(Slime slime)
+    {
+        inventory.AddSlime(slime);
+        uiInventory.RefreshInventorySlimes();
+    }
+
+    private void UpdateSlimeInHand()
+    {
+        if (currentSlimeInHand != null)
+        {
+            Destroy(currentSlimeInHand);
+        }
+
+        Slime selectedSlime = inventory.GetSelectedSlime();
+        if (selectedSlime.slimeType != null)
+        {
+            GameObject modelPrefab = GetModelPrefabForSlimeType(selectedSlime.slimeType);
+            if (modelPrefab != null)
+            {
+                currentSlimeInHand = Instantiate(modelPrefab, transform.position, Quaternion.identity);
+                currentSlimeInHand.transform.SetParent(transform); // Faites en sorte que le slime suive le joueur
+                //currentSlimeInHand.transform.localPosition = new Vector3(0, 0, 1); // Ajustez cette position comme nécessaire
+            }
+        }
+    }
+
+    private GameObject GetModelPrefabForSlimeType(Slime.SlimeType slimeType)
+    {
+        foreach (var slimeTypeModel in uiInventory.slimeSprites)
+        {
+            if (slimeTypeModel.slimeType == slimeType)
+            {
+                return slimeTypeModel.modelPrefab;
+            }
+        }
+        return null; // Retourne null si aucun modèle n'est trouvé pour ce type.
+    }
+
+
+
+
 }

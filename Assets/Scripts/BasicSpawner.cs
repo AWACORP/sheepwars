@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
   [SerializeField] private NetworkPrefabRef _playerPrefab;
+  [SerializeField] private UI_Inventory uiInventory;
   private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
 
 
@@ -20,6 +21,13 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
       NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
       // Keep track of the player avatars so we can remove it when they disconnect
       _spawnedCharacters.Add(player, networkPlayerObject);
+
+      Character characterScript = networkPlayerObject.GetComponent<Character>();
+
+      if (characterScript != null)
+      {
+        characterScript.SetUIInventory(uiInventory);
+      }
     }
   }
 
